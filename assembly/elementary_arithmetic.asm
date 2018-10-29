@@ -1,4 +1,4 @@
-TITLE Program Assignment 1: Elementary Arithmetic	(Assignment1.asm)
+TITLE Program Assignment 1: Elementary Arithmetic
 
 ; Author: Adam Walker
 ; Last Modified: 09/23/2018
@@ -19,7 +19,7 @@ num_1_prompt		BYTE	"First number: ", 0
 num_2_prompt		BYTE	"Second number: ", 0
 
 ; Error messages
-second_larger	BYTE	"The second number must be less than the first!", 0
+second_larger		BYTE	"The second number must be less than the first!", 0
 divide_zero		BYTE	"We can't divide by zero!", 0
 
 ; Variables to hold 2 numbers and calculated fields
@@ -30,7 +30,7 @@ difference		DWORD	0
 product			DWORD	0
 quotient		DWORD	0
 remain			DWORD	0
-quotient_float	QWORD	?
+quotient_float		QWORD	?
 
 ; Used when reporting results
 plus			BYTE	" + ", 0

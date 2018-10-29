@@ -1,4 +1,4 @@
-TITLE Program Assignment 3: Integer Accumulator	(Assignment3.asm)
+TITLE Program Assignment 3: Integer Accumulator
 
 ; Author: Adam Walker
 ; Last Modified: 10/28/2018

@@ -1,4 +1,4 @@
-TITLE Program Assignment 2: Fibonacci Numbers	(Assignment2.asm)
+TITLE Program Assignment 2: Fibonacci Numbers
 
 ; Author: Adam Walker
 ; Last Modified: 10/14/2018
