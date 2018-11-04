@@ -15,7 +15,7 @@ NUMBERS_PER_LINE = 10
 NUMBERS_PER_PAGE = 400
 
 ; Introductory messages and prompts
-intro_1			BYTE	"Composite Numbers   Programmed by Adam Walker", 0
+intro_1		BYTE	"Composite Numbers   Programmed by Adam Walker", 0
 ec_1			BYTE	"**EC: Align the output columns.", 0
 ec_2			BYTE	"**EC: Display more composites (composite limit now set to 2000 rather than 400) and show them one page at a time (400 per page).", 0
 comp_intro1		BYTE	"Enter the number of composite numbers you would like to see.", 0
@@ -34,7 +34,7 @@ gap			BYTE	" ", 0
 ; Variables to hold user input and calculated fields
 comps_to_find		DWORD	0	; Total number of composites to return
 good_num		BYTE	0	; Used during input validation
-is_comp			BYTE	0	; Flags if number being checked is a composite number
+is_comp		BYTE	0	; Flags if number being checked is a composite number
 comp_counter		BYTE	0	; Used within inner loop
 current_num		DWORD	1	; Number being checked
 numbers_printed_line	DWORD	0	; Tracks numbers printed on the current line
