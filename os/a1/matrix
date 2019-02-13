@@ -1,0 +1,461 @@
+#!/bin/bash
+
+##########################################
+# Name: CS344 Program 1
+# Date: January 2019
+# Author: Adam Walker
+# Description: Matrix operation functions
+##########################################
+
+
+function dims(){
+  # NAME
+  #   dims - Prints dimension (number of rows and columns) of input matrix
+  # SYNOPSIS
+  #   dims [matrix]
+  # DESCRIPTION
+  #   Outputs the number of rows and columns of an input matrix 
+  #   Columns in the input matrix must be separated by tabs
+  # AUTHOR
+  #   Written by Adam Walker (walkerad@oregonstate.edu)
+
+  # Check for appropriate number of arguments (1 or less)
+  if [[ $# -ge 2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: incorrect number of arguments" 1>&2
+    exit 1
+  fi
+
+  # Check if input file is readable
+  # Reference: https://askubuntu.com/questions/558977/checking-for-a-file-and-whether-it-is-readable-and-writable
+  if [[ -r $datafilepath ]]
+  then
+
+    # Find number of rows in matrix by counting lines of input path
+    rows=$(wc -l < $datafilepath)
+
+    # Finds number of matrix columns by counting number of tabs in first line - this is done indirectly by removing numbers and punctuation
+    # Reference: https://stackoverflow.com/questions/44934225/count-the-number-of-items-in-a-shell-variable
+    # Reference: https://unix.stackexchange.com/questions/140556/print-all-lines-which-not-containing-punctuation  
+    read myLine < $datafilepath
+    cols=$(grep -o [^0-9] <<< $myLine | grep -o [^[:punct:]] | wc -l)
+    (( cols++ )) # Need to add 1 to get correct number of columns 
+
+    # Print rows and cols in matrix
+    echo $rows $cols
+
+  else
+    clean_up $cat_input # Delete temp files
+    echo "ERROR: File not readable" 1>&2
+    # Reference: https://stackoverflow.com/questions/4381618/exit-a-script-on-error
+    exit 1  
+
+  fi
+
+}
+
+
+
+function mean(){
+  # NAME
+  #   mean - Prints column means of input matrix
+  # SYNOPSIS
+  #   mean [matrix]
+  # DESCRIPTION
+  #   Calculate column means of an input matrix by looping over columns and rows
+  #   Assumes columns are sepearated by tabs. Rounds means to integers. Prints column means as tab separated integers on same line.
+  # AUTHOR
+  #   Written by Adam Walker (walkerad@oregonstate.edu)
+
+  # Check for appropriate arguments
+  if [[ $# -ge 2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: incorrect number of arguments" 1>&2
+    exit 1
+  fi
+
+# Check if input file is readable
+if [[ -r $datafilepath ]]
+then
+
+  # Find number of rows in matrix by counting lines of input path
+  rows=$(wc -l < $datafilepath)
+
+  # Finds number of matrix columns by counting number of tabs in first line - this is done indirectly by removing numbers and punctuation
+  read myLine < $datafilepath
+  cols=$(grep -o [^0-9] <<< $myLine | grep -o [^[:punct:]] | wc -l)
+  (( cols++ ))
+
+  # Loop through each column
+  # Reference: http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-7.html 
+  sum=0
+  for i in `seq 1 $cols`;
+  do
+   
+      # Counter is used to check number of rows read. Sum is for a running total eventually divided to get mean
+      counter=0
+      sum=0
+
+      # Read each row
+      while read myLine1
+      do
+
+      # Replace tabs with new line character
+      # Gets the row in a column format that head can operate on
+      myLine1="${myLine1//	/\n}"
+      (( counter++ ))
+   
+      # Get number from correct column and add it to the running sum
+      num1=$(echo -e $myLine1 | head -n $i | tail -1)
+      sum=$(( $num1 + $sum ))
+      
+      # When last row has been read, calculate the mean using rounding formula given in assignment description
+      # Prints the mean, and also prints a tab unless the last column has been reached
+      if [ $counter -eq $rows ]
+      then
+      mean=$((($sum + ($rows/2)*( ($sum>0)*2-1 )) / $rows))
+      echo -n $mean
+        if [ $i -ne $cols ]
+        then
+        echo -e -n "\t"
+        fi
+      fi
+
+      done <$datafilepath
+
+  done
+
+  echo
+
+else
+
+  clean_up $cat_input
+  echo "ERROR: Mean matrix file not readable" 1>&2
+  exit 1  
+
+fi
+
+}
+
+
+
+function transpose(){
+  # NAME
+  #   transpose - transposes an input matrix
+  # SYNOPSIS
+  #   transpose [matrix]
+  # DESCRIPTION
+  #   Tranposes (converts rows to columns) of an input matrix, where columns are assumed to be tab-separated 
+  # AUTHOR
+  #   Written by Adam Walker (walkerad@oregonstate.edu)
+
+  # Check for appropriate arguments
+  if [[ $# -ge 2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: incorrect number of arguments" 1>&2
+    exit 1
+  fi
+
+# Check if input file is readable
+if [[ -r $datafilepath ]]
+then
+
+  # Find number of rows in matrix by counting lines of input path
+  rows=$(wc -l < $datafilepath)
+
+  # Finds number of matrix columns by counting number of tabs in first line - this is done indirectly by removing numbers and punctuation
+  read myLine < $datafilepath
+  cols=$(grep -o [^0-9] <<< $myLine | grep -o [^[:punct:]] | wc -l)
+  (( cols++ ))
+
+  # Loop through columns
+  # Reference: http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO-7.html
+  for i in `seq 1 $cols`;
+  do
+   
+      counter=0
+
+      # Read in each row
+      while read myLine1
+      do
+
+      # Replace tabs with new line character
+      myLine1="${myLine1//	/\n}"
+      (( counter++ ))
+   
+      # Print each number in a particular column on the same line (thus converting columns to rows)
+      # Print a tab after each number to separate them, unless it's the end of the row, in which case print newline
+      num1=$(echo -e $myLine1 | head -n $i | tail -1)
+      if [ $counter -eq $rows ]
+      then
+      echo $num1
+      else
+      echo -n $num1
+      echo -e -n "\t"
+      fi
+
+      done <$datafilepath
+
+  done
+
+else
+
+  clean_up $cat_input
+  echo "ERROR: Tranpose matrix file not readable" 1>&2
+  exit 1  
+
+fi
+
+}
+
+
+
+function add(){
+  # NAME
+  #   add - adds two provided matrices
+  # SYNOPSIS
+  #   add MATRIX_LEFT MATRIX_RIGHT
+  # DESCRIPTION
+  #   Adds two matrices, printing the sum as a tab separated matrix
+  #   Matrices must have same dimension
+  # AUTHOR
+  #   Written by Adam Walker (walkerad@oregonstate.edu)
+
+  # Check for appropriate arguments (must have 2 matrices)
+  if [[ $# -ne 2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: incorrect number of arguments" 1>&2
+    exit 1
+  fi
+
+# Check if input files are readable
+if [[ -r $1 && -r $2 ]]
+then
+
+  # Find number of rows in matrix by counting lines of input path
+  # Check matrices have same number of rows
+  rows1=$(wc -l < $1)
+  rows2=$(wc -l < $2)
+  if [[ $rows1 -ne $rows2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: row mismatch" 1>&2
+    exit 1
+  fi  
+
+  # Loop through each row of the input matrices
+  # Reference: https://stackoverflow.com/questions/8550385/how-to-read-1-line-from-2-files-sequentially
+  while read myLine1 && read myLine2 <&3
+  do
+ 
+    # Get the number of columns in each matrix
+    cols1=$(grep -o [^0-9] <<< $myLine1 | grep -o [^[:punct:]] | wc -l)
+    cols2=$(grep -o [^0-9] <<< $myLine2 | grep -o [^[:punct:]] | wc -l)
+    (( cols1++ ))
+    (( cols2++ ))
+  
+    # Check matrices have same number of cols
+    if [[ $cols1 -ne $cols2 ]]
+    then
+      clean_up $cat_input
+      echo "ERROR: column mismatch" 1>&2
+      exit 1
+    fi
+
+    # Replace tabs with new line character, converts a row to a column for easy parsing with head and tail
+    myLine1="${myLine1//	/\n}"
+    myLine2="${myLine2//	/\n}"
+
+    # Loop through the numbers in each row
+    # Add them together, and print result
+    for i in `seq 1 $cols1`;
+    do
+   
+      num1=$(echo -e $myLine1 | head -n $i | tail -1)
+      num2=$(echo -e $myLine2 | head -n $i | tail -1)
+      if [ $i -eq $cols1 ]
+      then
+      echo -n $(( $num1 + $num2 ))
+      else
+      echo -n $(( $num1 + $num2 ))
+      echo -e -n "\t"
+      fi
+
+    done
+
+    # Print a newline at the end of each row
+    echo
+
+  done <$1 3<$2
+
+else
+
+  clean_up $cat_input
+  echo "ERROR: File not readable" 1>&2
+  exit 1  
+
+fi
+
+}
+
+
+
+function multiply(){
+  # NAME
+  #   multiply - Prints product of two input matrices
+  # SYNOPSIS
+  #   multiply MATRIX_LEFT MATRIX_RIGHT
+  # DESCRIPTION
+  #   Matrix multiplication of two input matrices
+  #   For an AxB * CxD product, B and C must match, and the product will be an AxD matrix
+  #   Assumes both input matrices have tab-separated columns  
+  # AUTHOR
+  #   Written by Adam Walker (walkerad@oregonstate.edu)
+
+  # Check for appropriate number of arguments (two input matrices)
+  if [[ $# -ne 2 ]]
+  then
+    clean_up $cat_input
+    echo "ERROR: incorrect number of arguments" 1>&2
+    exit 1
+  fi
+
+  # Check if input files are readable
+  if [[ -r $1 && -r $2 ]]
+  then
+
+    # Find number of rows in matrices by counting lines of input path
+    rows1=$(wc -l < $1)
+    rows2=$(wc -l < $2) 
+   
+    # Find number of columns in matrices by counting tabs in first line 
+    read myLine1 < $1
+    cols1=$(grep -o [^0-9] <<< $myLine1 | grep -o [^[:punct:]] | wc -l)
+    (( cols1++ ))
+
+    read myLine2 < $2
+    cols2=$(grep -o [^0-9] <<< $myLine2 | grep -o [^[:punct:]] | wc -l)
+    (( cols2++ ))
+
+    # Check columns of first matrix match number of rows in second
+    if [[ $cols1 -ne $rows2 ]]
+    then
+      clean_up $cat_input
+      echo "ERROR: multiplcation dimension mismatch" 1>&2
+      exit 1
+    fi
+
+    # Loop through rows of first matrix 
+    while read myLine1
+    do
+ 
+      # Tracks place in second matrix
+      m2_element=1
+
+      # Replace tabs with new line character for easier parsing by head and tail
+      myLine1="${myLine1//	/\n}"
+    
+      # Loop through columns of second matrix
+      for i in `seq 1 $cols2`;
+      do
+ 
+        # Element holds running total of value for an element of the product matrix
+        element=0
+
+        # Tracks place in first matrix
+        m1_element=1
+
+        # Loop through rows of second matrix
+        # Each product element is simply the sum of a row of matrix 1 multiplied by a column of matrix 2
+        while read myLine2
+        do
+ 
+        # Replace tabs with new line character for easier parsing by head and tail
+        myLine2="${myLine2//	/\n}" 
+
+        # Add to running element total by multiplying and adding to sum
+        num1=$(echo -e $myLine1 | head -n $m1_element | tail -1)
+        num2=$(echo -e $myLine2 | head -n $m2_element | tail -1)
+        element=$(( $element + ( $num1 * $num2 ) ))
+
+        # Once a product element has been completed by iterating over the appropriate rows and columns, print it
+        if [[ $m1_element -eq $cols1 ]]
+        then
+          if [[ $m2_element -eq $cols2 ]]
+          then
+            echo $element
+          else
+            echo -n $element
+            echo -e -n "\t"
+          fi
+        fi
+      
+        (( m1_element++ ))    
+
+        done <$2
+
+        (( m2_element++ ))
+
+      done
+
+    done <$1
+
+  else
+
+    clean_up $cat_input
+    echo "ERROR: File not readable" 1>&2
+    exit 1  
+
+  fi
+
+}
+
+
+# Snippet from hints, creates path to file contents
+datafilepath="datafile$$"
+if [ "$#" = "1" ]
+then
+    cat > "$datafilepath"
+elif [ "$#" = "2" ]
+then
+    datafilepath=$2
+fi
+
+
+# Cleanup temp files
+# Only clean up if cat used to pipe input
+cat_input=$#
+function clean_up(){
+  if [ $cat_input -eq 1 ]
+  then
+    rm -f $datafilepath
+  fi
+}
+
+
+# Check if provided argument is a function 
+# https://stackoverflow.com/questions/85880/determine-if-a-function-exists-in-bash
+fn_exists() {
+  [ `type -t $1`"" == 'function' ]
+}
+
+if ! fn_exists $1; then
+    clean_up $cat_input
+    echo "ERROR: $1 does not exist!" 1>&2
+    exit 1
+fi
+
+
+# Remove temp files if signal received
+trap "rm -f $datafilepath; echo 'SIGINT received: Deleting temp file then exiting!'; exit 1" SIGINT HUP TERM
+
+# Run first argument as function with remaining arguments passed as parameters
+$1 "${@:2}"
+
+# Cleanup temp files
+clean_up $cat_input
+
