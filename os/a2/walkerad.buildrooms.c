@@ -1,6 +1,6 @@
 
 /*****************************************
-# Name: CS344 Program 2
+# Name: Program 2
 # Date: February 2019
 # Author: Adam Walker
 # Description: Adventure game room builder

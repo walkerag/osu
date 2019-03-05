@@ -1,6 +1,6 @@
 
 /*****************************************
-# Name: CS344 Program 3
+# Name: Program 3
 # Date: March 2019
 # Author: Adam Walker
 # Description: smallsh assignment: Create
